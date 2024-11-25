@@ -3,7 +3,7 @@
 <!ENTITY name      "unraid.patch">
 <!ENTITY author    "Andrew Zawadzki">
 <!ENTITY version   "2024.11.25">
-<!ENTITY md5       "b8c930887bc17397582258bccc07f63d">
+<!ENTITY md5       "d48b64a220848537a596dbc3379a9806">
 <!ENTITY plugdir   "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github    "Squidly271/page.notes">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/plugins/&name;.plg">
