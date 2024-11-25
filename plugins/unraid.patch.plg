@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "unraid.patch">
 <!ENTITY author    "Andrew Zawadzki">
-<!ENTITY version   "2024.11.25a">
-<!ENTITY md5       "91181a6f7151261f2a86b5d34e42ef76">
+<!ENTITY version   "2024.11.25b">
+<!ENTITY md5       "7c32cc6c75bf104ad423cb00ac4985b4">
 <!ENTITY plugdir   "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github    "Squidly271/unraid.patch">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/plugins/&name;.plg">
@@ -36,6 +36,7 @@ The 'post-install' script
 -->
 <FILE Run="/bin/bash">
 <INLINE>
+/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php install
 echo ""
 echo "----------------------------------------------------"
 echo " &name; has been installed."

@@ -81,8 +81,8 @@ switch($action) {
 function install() {
   global $paths, $unraidVersion;
 
-  if ( ! file_exists($paths['accepted'] ) {
-    logger("Installation of Unraid patches not accepted.  You must go to Tools - Unraid Patch and accept the disclaimer");
+  if ( ! file_exists($paths['accepted']) ) {
+    logger("Installation of Unraid patches not accepted.  You must go to Tools - Unraid Patch and accept the disclaimer\n");
     exit();
   }
   $installedUpdates = readJsonFile($paths['installedUpdates']);
