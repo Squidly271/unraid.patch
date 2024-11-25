@@ -1,8 +1,21 @@
 Menu="About"
 Title="Unraid Patch"
 ---
-<script>
+<?
+/* Copyright 2024, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
 
+require_once "/usr/local/emhttp/plugins/unraid.patch/include/paths.php";
+?>
+
+<script>
 function myAlert(description,textdescription,textimage,imagesize, outsideClick, showCancel, showConfirm, alertType) {
   if ( !outsideClick ) outsideClick = false;
   if ( !showCancel )   showCancel = false;
@@ -22,13 +35,13 @@ function myAlert(description,textdescription,textimage,imagesize, outsideClick, 
   });
 }
 
-function my_openBox(cmd,title,height,width,load,func) {
-  // open shadowbox window (run in foreground)
-  var run = cmd.split('?')[0].substr(-4)=='.php' ? cmd : '/logging.htm?cmd='+cmd+'&csrf_token=<?=$var['csrf_token']?>';
-  var options = load ? {modal:false,onClose:function(){ eval(func); }} : {modal:true};
-  Shadowbox.open({content:run, player:'iframe', title:title, height:height, width:width, options:options});
+function reload() {
+  window.location.reload();
 }
 
+function install() {
+  openBox("/plugins/unraid.patch/scripts/install.sh","Install Patch",550,900,true,"reload");
+}
 
 $(function() {
   caPluginUpdateCheck("unraid.patch.plg");
@@ -45,7 +58,7 @@ $(function() {
       confirmButtonText: "_(Accept)_"
       }, function (isConfirm) {
       if ( isConfirm ) {
-        $.post("/plugins/unraid.patch/include/exec.php",{action:"accepted"},function(data) {
+        $.post("<?=$paths['exec']?>",{action:"accepted"},function(data) {
           window.location.reload();
         });
       } else {
@@ -54,19 +67,25 @@ $(function() {
     }); 
   <? else: ?>
   myAlert("_(Checking For Updates)_");
-  $.post("/plugins/unraid.patch/include/exec.php",{action:"check"},function(data) {
+  $.post("<?=$paths['exec']?>",{action:"check"},function(data) {
     if (data) {
       swal.close();
       if (data.trim() == "none") {
         setTimeout(function() {
-          myAlert("_(No new patches found)_","_(This page will exit in 10 seconds)_");
+          myAlert("_(No new patches found)_");
+          $.post("<?=$paths['exec']?>",{action:"currentchangelog"},function(data) {
+            if (data) {
+              $("#changelogold").html(data);
+              $("#displayInstalled").show();
+            }
+          });
           setTimeout(function(){
-            history.back();
-          },10000);
+            swal.close();
+          },1000);
         },1000);
       } else {
-        $("#display").show();
-        $("#changelog").html(data);
+        $("#displayNew").show(); 
+        $("#changelognew").html(data);
         swal.close();
       }
     }
@@ -74,16 +93,15 @@ $(function() {
   <?endif;?>
   });
 
-function reload() {
-  window.location.reload();
-}
 
-function install() {
-  openBox("/plugins/unraid.patch/scripts/install.sh","Install Patch",550,900,true,"reload");
-}
 </script>
-<span style='display:none;' id='display'>
+<span style='display:none;' id='displayNew'>
 <span style='font-size:2rem;'>_(These patches will be automatically installed at the next boot of your server.  You can also click the Install Now button to install it immediately)_</span>
-<span id='changelog'></span>
+<span id='changelognew'></span>
 <input type='button' value='_(Install Now)_' onclick='install();'></input>
+</span>
+<span style='display:none' id='displayInstalled'>
+<span style='font-size:2rem;'>_(No new patches found!  The following patches are already installed and will be reinstalled automatically when your server boots)_</span>
+<span id='changelogold'></span>
+<input type='button' value='done' onclick='done();'></input>
 </span>

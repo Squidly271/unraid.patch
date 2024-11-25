@@ -1,10 +1,19 @@
 <?
+/* Copyright 2005-2023, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+
 $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: "/usr/local/emhttp";
 
 require_once "$docroot/plugins/unraid.patch/include/paths.php";
 require_once "$docroot/plugins/dynamix/include/Wrappers.php";
 require_once "$docroot/webGui/include/MarkdownExtra.inc.php";
-
 require_once "$docroot/webGui/include/Markdown.php";
 
 $unraidVersion = parse_ini_file($paths['version']);
@@ -18,6 +27,9 @@ switch ($_POST['action']) {
     break;
   case "install":
     install();
+    break;
+  case "currentchangelog":
+    currentchangelog();
     break;
 }
 
@@ -50,6 +62,13 @@ function check() {
 function install() {
   exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php install");
   echo "installed";
+}
+
+function currentchangelog() {
+  global $paths, $unraidVersion;
+
+  $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
+  echo markdown($current['changelog']);
 }
 
 function readJsonFile($filename) {
