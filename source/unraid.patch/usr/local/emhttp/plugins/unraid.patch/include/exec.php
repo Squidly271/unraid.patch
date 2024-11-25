@@ -36,6 +36,8 @@ switch ($_POST['action']) {
 }
 
 function accepted() {
+  global $paths;
+  
   touch($paths['accepted']);
   echo "ok";
 }
