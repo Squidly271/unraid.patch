@@ -58,6 +58,7 @@ $paths['installedUpdates'] = "{$paths['tmp']}/installedUpdates.json";
 $paths['flash'] = "/boot/config/plugins/unraid.patch/";
 $paths['version'] = "/etc/unraid-version";
 $paths['github'] = "https://releases.unraid.net/dl/stable";
+$paths['accepted'] = "/boot/config/plugins/unraid.patch/accepted";
 
 @mkdir($paths['tmp']);
 $unraidVersion = parse_ini_file($paths['version']);
@@ -80,6 +81,10 @@ switch($action) {
 function install() {
   global $paths, $unraidVersion;
 
+  if ( ! file_exists($paths['accepted'] ) {
+    logger("Installation of Unraid patches not accepted.  You must go to Tools - Unraid Patch and accept the disclaimer");
+    exit();
+  }
   $installedUpdates = readJsonFile($paths['installedUpdates']);
 
   $installDir = $paths['flash'].$unraidVersion['version]'];
