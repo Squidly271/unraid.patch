@@ -3,8 +3,27 @@ Title="Unraid Patch"
 ---
 <script>
 
+function myAlert(description,textdescription,textimage,imagesize, outsideClick, showCancel, showConfirm, alertType) {
+  if ( !outsideClick ) outsideClick = false;
+  if ( !showCancel )   showCancel = false;
+  if ( !showConfirm )  showConfirm = false;
+  if ( imagesize == "" ) { imagesize = "80x80"; }
+   
+  swal({
+    title: description,
+    text: textdescription,
+    imageUrl: textimage,
+    imageSize: imagesize,
+    allowOutsideClick: outsideClick,
+    showConfirmButton: showConfirm,
+    showCancelButton: showCancel,
+    type: alertType,
+    html: true
+  });
+}
+
 $(function() {
-  caPluginUpdateCheck("fix.common.problems.plg");
+  caPluginUpdateCheck("unraid.patch.plg");
 
   <?if ( ! file_exists("/boot/config/plugins/unraid.patch/accepted") ) :?>
     swal({
@@ -18,10 +37,39 @@ $(function() {
       confirmButtonText: "_(Accept)_"
       }, function (isConfirm) {
       if ( isConfirm ) {
+        $.post("/plugins/unraid.patch/include/exec.php",{action:"accepted"},function(data) {
+          window.location.reload();
+        });
       } else {
           history.back();
       }
-    });
-  <? endif; ?>
+    }); 
+  <? else: ?>
+  myAlert("_(Checking For Updates)_");
+  $.post("/plugins/unraid.patch/include/exec.php",{action:"check"},function(data) {
+    if (data) {
+      swal.close();
+      if (data.trim() == "none") {
+        setTimeout(function() {
+          myAlert("_(No patches found)_");
+          setTimeout(function(){
+            history.back();
+          },10000);
+        },1000);
+      } else {
+        setTimeout(function() {
+          myAlert("_(Installing Patches)_");
+          $.post("/plugins/unraid.patch/include/exec.php",{action:"install"},function(data) {
+            if (data) {
+             // swal.close();
+              //history.back();
+            }
+          });
+        },1000);
+      }
+    }
+  })
+  <?endif;?>
   });
+
 </script>
