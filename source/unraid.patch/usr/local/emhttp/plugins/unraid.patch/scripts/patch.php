@@ -112,7 +112,7 @@ function install() {
     if ( ! $exitCode ) {
       $installedUpdates[basename($script['url'])] = true;
     } else {
-      logger("Failed to install update ".basename($script['url'])."   Aborting\n");
+      logger("\n\nFailed to install update ".basename($script['url'])."   Aborting\n");
       exit(1);
     }
 

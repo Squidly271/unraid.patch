@@ -56,20 +56,18 @@ $(function() {
   myAlert("_(Checking For Updates)_");
   $.post("/plugins/unraid.patch/include/exec.php",{action:"check"},function(data) {
     if (data) {
-      alert(data);
       swal.close();
       if (data.trim() == "none") {
         setTimeout(function() {
-          myAlert("_(No new patches found)_");
+          myAlert("_(No new patches found)_","_(This page will exit in 10 seconds)_");
           setTimeout(function(){
             history.back();
           },10000);
         },1000);
       } else {
+        $("#display").show();
         $("#changelog").html(data);
         swal.close();
-
-
       }
     }
   })
@@ -81,9 +79,11 @@ function reload() {
 }
 
 function install() {
-  setTimeout(function() {
-            openBox("/plugins/unraid.patch/scripts/install.sh","Install Patch",550,900,true,"reload");
-          },1000);
+  openBox("/plugins/unraid.patch/scripts/install.sh","Install Patch",550,900,true,"reload");
 }
 </script>
+<span style='display:none;' id='display'>
+<span style='font-size:2rem;'>_(These patches will be automatically installed at the next boot of your server.  You can also click the Install Now button to install it immediately)_</span>
 <span id='changelog'></span>
+<input type='button' value='_(Install Now)_' onclick='install();'></input>
+</span>
