@@ -22,6 +22,14 @@ function myAlert(description,textdescription,textimage,imagesize, outsideClick, 
   });
 }
 
+function my_openBox(cmd,title,height,width,load,func) {
+  // open shadowbox window (run in foreground)
+  var run = cmd.split('?')[0].substr(-4)=='.php' ? cmd : '/logging.htm?cmd='+cmd+'&csrf_token=<?=$var['csrf_token']?>';
+  var options = load ? {modal:false,onClose:function(){ eval(func); }} : {modal:true};
+  Shadowbox.open({content:run, player:'iframe', title:title, height:height, width:width, options:options});
+}
+
+
 $(function() {
   caPluginUpdateCheck("unraid.patch.plg");
 
@@ -48,30 +56,34 @@ $(function() {
   myAlert("_(Checking For Updates)_");
   $.post("/plugins/unraid.patch/include/exec.php",{action:"check"},function(data) {
     if (data) {
+      alert(data);
       swal.close();
       if (data.trim() == "none") {
         setTimeout(function() {
-          myAlert("_(No patches found)_");
+          myAlert("_(No new patches found)_");
           setTimeout(function(){
             history.back();
           },10000);
         },1000);
       } else {
-        setTimeout(function() {
-          myAlert("_(Installing Patches)_");
-          $.post("/plugins/unraid.patch/include/exec.php",{action:"install"},function(data) {
-            if (data) {
-              setTimeout(function() {
-                swal.close();
-                history.back();
-              },1000);
-            }
-          });
-        },1000);
+        $("#changelog").html(data);
+        swal.close();
+
+
       }
     }
   })
   <?endif;?>
   });
 
+function reload() {
+  window.location.reload();
+}
+
+function install() {
+  setTimeout(function() {
+            openBox("/plugins/unraid.patch/scripts/install.sh","Install Patch",550,900,true,"reload");
+          },1000);
+}
 </script>
+<span id='changelog'></span>

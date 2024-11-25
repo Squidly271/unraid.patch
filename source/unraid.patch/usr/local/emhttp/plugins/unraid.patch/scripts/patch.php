@@ -1,5 +1,8 @@
 #!/usr/bin/php
 <?
+
+require_once "/usr/local/emhttp/plugins/unraid.patch/include/paths.php";
+
 function download_url($url, $path = "", $bg = false, $timeout = 45) {
   $vars = parse_ini_file("/var/local/emhttp/var.ini");
   $keyfile = empty($vars['regFILE']) ? false : @base64_encode(@file_get_contents($vars['regFILE']??""));
@@ -53,12 +56,6 @@ function logger($msg) {
 }
 ###MAIN
 
-$paths['tmp'] = "/tmp/unraid.patch";
-$paths['installedUpdates'] = "{$paths['tmp']}/installedUpdates.json";
-$paths['flash'] = "/boot/config/plugins/unraid.patch/";
-$paths['version'] = "/etc/unraid-version";
-$paths['github'] = "https://releases.unraid.net/dl/stable";
-$paths['accepted'] = "/boot/config/plugins/unraid.patch/accepted";
 
 @mkdir($paths['tmp']);
 $unraidVersion = parse_ini_file($paths['version']);
