@@ -28,7 +28,7 @@ $(function() {
   <?if ( ! file_exists("/boot/config/plugins/unraid.patch/accepted") ) :?>
     swal({
       title: "_(Unraid Patch)_",
-      text: '_(This plugin will automatically install any security pathes issued for Unraid.  To allow, you must click accept.)_',
+      text: '_(This plugin will automatically install any security patches issued for Unraid.  To allow, you must click accept.)_',
       html: true,
       type: 'warning',
       showCancelButton: true,
@@ -61,8 +61,10 @@ $(function() {
           myAlert("_(Installing Patches)_");
           $.post("/plugins/unraid.patch/include/exec.php",{action:"install"},function(data) {
             if (data) {
-             // swal.close();
-              //history.back();
+              setTimeout(function() {
+                swal.close();
+                history.back();
+              },1000);
             }
           });
         },1000);

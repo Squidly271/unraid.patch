@@ -7,6 +7,9 @@ switch ($_POST['action']) {
   case "check":
     check();
     break;
+  case "install":
+    install();
+    break;
 }
 
 function accepted() {
@@ -16,7 +19,12 @@ function accepted() {
 
 function check() {
   exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php check");
-  echo "non1e";
+  echo "blah"; // need to check against what's already installed
+}
+
+function install() {
+  exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php install");
+  echo "installed";
 }
 ?>
 
