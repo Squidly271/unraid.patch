@@ -2,14 +2,14 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "unraid.patch">
 <!ENTITY author    "Andrew Zawadzki">
-<!ENTITY version   "2024.11.25g">
-<!ENTITY md5       "5907c88160735d93d8d22b1b40ccbb2a">
+<!ENTITY version   "2024.11.25h">
+<!ENTITY md5       "17e2aa2ca7cfcf1f5dbe2003f3120f9b">
 <!ENTITY plugdir   "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github    "Squidly271/unraid.patch">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/plugins/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="edit">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="asterisk">
 
 <CHANGES>
 ###2024.11.24
@@ -40,7 +40,7 @@ The 'post-install' script
 echo ""
 echo "----------------------------------------------------"
 echo " &name; has been installed."
-echo " Copyright 2023-2024, Andrew Zawadzki"
+echo " Copyright 2024, Limetechnology, Inc"
 echo " Version: &version;"
 echo "----------------------------------------------------"
 echo ""
@@ -52,9 +52,11 @@ The 'remove' script.
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
+echo NOTE: REMOVING THIS PLUGIN WILL ALSO NOT RE-INSTALL ANY PRIORITY SECURITY UPDATES DURING BOOT
 removepkg &name;-&version;-x86_64-1
 rm -rf &plugdir;
-rm -rf /usr/local/emhttp/pageNotes.php
+rm -rf /usr/local/emhttp/plugins/unraid.patch/
+rm -rf /boot/config/plugins/unraid.patch/
 </INLINE>
 </FILE> 
 </PLUGIN>
