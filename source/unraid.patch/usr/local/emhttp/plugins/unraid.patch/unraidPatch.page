@@ -1,0 +1,27 @@
+Menu="About"
+Title="Unraid Patch"
+---
+<script>
+$(function() {
+  <?if ( ! file_exists("/boot/config/plugins/unraid.patch/accepted") ) :?>
+    swal({
+      title: "_(Unraid Patch)_",
+      text: '_(This plugin will automatically install any security updates issued for Unraid.  To allow, you must click accept.)_',
+      html: true,
+      type: 'warning',
+      showCancelButton: true,
+      showConfirmButton: true,
+      cancelButtonText: "_(Cancel)_",
+      confirmButtonText: "_(Accept)_"
+      }, function (isConfirm) {
+      if ( isConfirm ) {
+          $.cookie("ca_memoryOverride","");
+          history.back();
+      } else {
+          $.cookie("ca_memoryOverride","override");
+          location.reload();
+      }
+    });
+  <? endif; ?>
+  });
+</script>
