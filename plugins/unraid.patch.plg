@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "unraid.patch">
 <!ENTITY author    "Andrew Zawadzki">
-<!ENTITY version   "2024.11.25h">
-<!ENTITY md5       "17e2aa2ca7cfcf1f5dbe2003f3120f9b">
+<!ENTITY version   "2024.11.25i">
+<!ENTITY md5       "9c818a05d7ee50af1065ec4bdd186536">
 <!ENTITY plugdir   "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github    "Squidly271/unraid.patch">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/plugins/&name;.plg">
@@ -37,6 +37,13 @@ The 'post-install' script
 <FILE Run="/bin/bash">
 <INLINE>
 /usr/local/emhttp/plugins/unraid.patch/scripts/patch.php install
+
+ln -s /usr/local/emhttp/plugins/unraid.patch/scripts/backgroundCheck.php /etc/cron.weekly/backgroundCheck.php 
+
+if [ ! -f /boot/config/plugins/unraid.patch/accepted ]; then
+  /usr/local/emhttp/plugins/unraid.patch/scripts/backgroundCheck.php
+fi
+
 echo ""
 echo "----------------------------------------------------"
 echo " &name; has been installed."

@@ -1,5 +1,5 @@
 <?
-/* Copyright 2005-2023, Lime Technology
+/* Copyright 2024, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -17,6 +17,8 @@ require_once "$docroot/webGui/include/MarkdownExtra.inc.php";
 require_once "$docroot/webGui/include/Markdown.php";
 
 $unraidVersion = parse_ini_file($paths['version']);
+
+$_POST['action'] = $_POST['action'] ?? $argv[1];
 
 switch ($_POST['action']) {
   case "accepted": 
