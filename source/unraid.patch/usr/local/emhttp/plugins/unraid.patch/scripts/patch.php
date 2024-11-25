@@ -47,7 +47,10 @@ function readJsonFile($filename) {
 function getPost($setting,$default="") {
   return isset($_POST[$setting]) ? urldecode(($_POST[$setting])) : $default;
 }
-
+function logger($msg) {
+  echo $msg;
+  exec("logger ".escapeshellarg($msg));
+}
 ###MAIN
 
 $paths['tmp'] = "/tmp/unraid.patch";
@@ -81,33 +84,33 @@ function install() {
 
   $installDir = $paths['flash'].$unraidVersion['version]'];
   if ( ! is_dir($installDir) ) {
-    echo "Installation directory not found.  Aborting patch installation\n";
+    logger("Installation directory not found.  Aborting patch installation\n");
     exit(1);
   }
 
   $updates = readJsonFile("{$paths['flash']}/{$unraidVersion['version']}/patches.json");
   if ( ! is_array($updates['patches']) ) {
-    echo "Could not read updates.json.  Aborting";
+    logger("Could not read updates.json.  Aborting");
     exit(1);
   }
   // install each update in order
   foreach($updates['patches'] as $script) {
     $filename = "{$paths['flash']}/{$unraidVersion['version']}/".basename($script['url']);
     if ( $installedUpdates[basename($script['url'])] ?? false ) {
-      echo "Skipping $filename... Already Installed\n";
+      logger("Skipping $filename... Already Installed\n");
       continue;
     }
 
-    echo "Installing $filename...";
+    logger("Installing $filename...\n\n");
     if ( md5_file($filename) !== $script['md5'] ) {
-      echo "MD5 verification failed.  Aborting\n";
+      logger("MD5 verification failed.  Aborting\n");
       exit(1);
     }
     passthru("/usr/bin/patch -d /usr/local/ -p1 -i ".escapeshellarg($filename),$exitCode);
     if ( ! $exitCode ) {
       $installedUpdates[basename($script['url'])] = true;
     } else {
-      echo "Failed to install update ".basename($script['url'])."   Aborting\n";
+      logger("Failed to install update ".basename($script['url'])."   Aborting\n");
       exit(1);
     }
 
@@ -120,7 +123,7 @@ function check() {
 
   $option = $option ?: $unraidVersion['version'];
   $patchesAvailable = $paths['github']."/$option/patch/patches.json";
-  echo "Checking for updates $patchesAvailable\n";
+  logger("Checking for updates $patchesAvailable\n");
   $updates = download_json($patchesAvailable);
   if (! $updates || empty($updates) )
     return;
@@ -132,22 +135,22 @@ function check() {
   exec("mkdir -p ".escapeshellarg($newPath));
   foreach ($updates['patches'] as $patches) {
     if ( isset($installedUpdates[basename($patches['url'])]) ) {
-      echo "Skipping {$patches['url']} -- Already installed\n";
+      logger("Skipping {$patches['url']} -- Already installed\n");
       continue;
     }
-    echo "Downloading {$patches['url']}...";
+    logger("Downloading {$patches['url']}...");
 
     download_url($patches['url'],"$newPath/".basename($patches['url']));
     if (md5_file("$newPath/".basename($patches['url'])) !== $patches['md5']) {
 
-      echo "MD5 verification failed!";
+      logger("MD5 verification failed!");
       $downloadFailed = true;
       @unlink("$newpath/".basename($patches['file']));
       break;
     }
   }
   if ( $downloadFailed ) {
-    echo "\n\Downloads aborted.";
+    logger("\n\Downloads aborted.");
     // only delete files that haven't already been installed
     $alreadyInstalled = glob("{$paths['flash']}/$option/");
     foreach ( $alreadyInstalled as $file) {
