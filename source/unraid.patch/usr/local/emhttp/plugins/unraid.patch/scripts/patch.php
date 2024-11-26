@@ -101,7 +101,7 @@ function install() {
 
   $updates = readJsonFile("{$paths['flash']}/{$unraidVersion['version']}/patches.json");
   if ( ! is_array($updates['patches']) ) {
-    logger("Could not read updates.json.  Aborting");
+    logger("Could not read patches.json.  Aborting");
     exit(1);
   }
   // install each update in order
@@ -121,7 +121,7 @@ function install() {
     if ( ! $exitCode ) {
       $installedUpdates[basename($script['url'])] = true;
     } else {
-      logger("\n\nFailed to install update ".basename($script['url'])."   Aborting\n");
+      logger("\n\nFailed to install patch ".basename($script['url'])."   Aborting\n");
       exit(1);
     }
 
@@ -140,7 +140,7 @@ function check() {
     $patchesAvailable = trim(file_get_contents($paths['override']));
   }
 
-  logger("Checking for updates $patchesAvailable\n");
+  logger("Checking for patches $patchesAvailable\n");
   $updates = download_json($patchesAvailable);
   if (! $updates || empty($updates) )
     return;
