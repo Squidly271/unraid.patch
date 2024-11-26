@@ -56,22 +56,20 @@ function readJsonFile($filename) {
 
   return is_array($json) ? $json : array();
 }
-function getPost($setting,$default="") {
-  return isset($_POST[$setting]) ? urldecode(($_POST[$setting])) : $default;
-}
+
 function logger($msg) {
   echo $msg;
   exec("logger ".escapeshellarg($msg));
 }
-###MAIN
 
+
+###MAIN
 
 @mkdir($paths['tmp']);
 $unraidVersion = parse_ini_file($paths['version']);
 
 $action = $argv[1] ?? "";
 $option = $argv[2] ?? "";
-
 
 switch($action) {
   case "install":
@@ -93,18 +91,45 @@ function install() {
   }
   $installedUpdates = readJsonFile($paths['installedUpdates']);
 
-  $installDir = $paths['flash'].$unraidVersion['version]'];
+  $installDir = $paths['flash'].$unraidVersion['version'];
   if ( ! is_dir($installDir) ) {
     logger("Installation directory not found.  Aborting patch installation\n");
     exit(1);
   }
 
   $updates = readJsonFile("{$paths['flash']}/{$unraidVersion['version']}/patches.json");
-  if ( ! is_array($updates['patches']) ) {
-    logger("Could not read patches.json.  Aborting");
+  if ( ! is_array($updates['patches']) && ! is_array($updates['prescripts']) && ! is_array($updates['scripts']) ) {
+    logger("Could not read patches.json.  Aborting\n");
+    exit(1);
+  }
+  if ( version_compare($unraidVersion['version'],$updates['unraidVersion'],"!=") ) {
+    logger("Unraid version mismatch in patches.json.  Aborting Installation\n");
     exit(1);
   }
   // install each update in order
+  foreach($updates['prescript'] ?? [] as $script) {
+    $filename = "{$paths['flash']}{$unraidVersion['version']}/".basename($script['url']);
+    if ( $installedUpdates[basename($script['url'])] ?? false ) {
+      logger("Skipping $filename... Already Installed\n");
+      continue;
+    }
+
+    logger("Executing $filename...\n\n");
+    copy($filename,$paths['tmp']."/script");
+    if ( md5_file($paths['tmp']."/script") !== $script['md5'] ) {
+      logger("MD5 verification failed.  Aborting\n");
+      exit(1);
+    }
+    chmod($paths['tmp']."/script",777);
+    passthru($paths['tmp']."/script",$exitCode);
+    @unlink($paths['tmp']."/script");
+    if ( ! $exitCode ) {
+      $installedUpdates[basename($script['url'])] = true;
+    } else {
+      logger("\n\nFailed to install script ".basename($script['url'])."   Aborting\n");
+      exit(1);
+    }
+  }
   foreach($updates['patches'] as $script) {
     $filename = "{$paths['flash']}{$unraidVersion['version']}/".basename($script['url']);
     if ( $installedUpdates[basename($script['url'])] ?? false ) {
@@ -124,7 +149,29 @@ function install() {
       logger("\n\nFailed to install patch ".basename($script['url'])."   Aborting\n");
       exit(1);
     }
+  }
+  foreach($updates['scripts'] ?? [] as $script) {
+    $filename = "{$paths['flash']}{$unraidVersion['version']}/".basename($script['url']);
+    if ( $installedUpdates[basename($script['url'])] ?? false ) {
+      logger("Skipping $filename... Already Installed\n");
+      continue;
+    }
 
+    logger("Executing $filename...\n\n");
+    copy($filename,$paths['tmp']."/script");
+    if ( md5_file($paths['tmp']."/script") !== $script['md5'] ) {
+      logger("MD5 verification failed.  Aborting\n");
+      exit(1);
+    }
+    chmod($paths['tmp']."/script",777);
+    passthru($paths['tmp']."/script",$exitCode);
+    @unlink($paths['tmp']."/script");
+    if ( ! $exitCode ) {
+      $installedUpdates[basename($script['url'])] = true;
+    } else {
+      logger("\n\nFailed to install script ".basename($script['url'])."   Aborting\n");
+      exit(1);
+    }
   }
   writeJsonFile($paths['installedUpdates'],$installedUpdates);
 }
@@ -150,7 +197,7 @@ function check() {
   $installedUpdates = readJsonFile($paths['installedUpdates']);
   $newPath = "{$paths['flash']}/$option/";
   exec("mkdir -p ".escapeshellarg($newPath));
-  foreach ($updates['patches'] as $patches) {
+  foreach ($updates['patches'] ?? [] as $patches) {
     if ( isset($installedUpdates[basename($patches['url'])]) ) {
       logger("Skipping {$patches['url']} -- Already installed\n");
       continue;
@@ -168,6 +215,48 @@ function check() {
       logger("MD5 verification failed!");
       $downloadFailed = true;
       @unlink("$newpath/".basename($patches['file']));
+      break;
+    }
+  }
+  foreach ($updates['scripts'] ?? [] as $scripts) {
+    if ( isset($installedUpdates[basename($scripts['url'])]) ) {
+      logger("Skipping {$scripts['url']} -- Already installed\n");
+      continue;
+    }
+    logger("Downloading {$scripts['url']}...");
+    if ( is_file("$newPath/".basename($scripts['url']))) {
+      if (md5_file("$newPath/".basename($scripts['url'])) == $scripts['md5']) {
+        logger("Script file already exists.  Skipping");
+        continue;
+      }
+    }
+
+    download_url($scripts['url'],"$newPath/".basename($scripts['url']));
+    if (md5_file("$newPath/".basename($scripts['url'])) !== $scripts['md5']) {
+      logger("MD5 verification failed!");
+      $downloadFailed = true;
+      @unlink("$newpath/".basename($scripts['file']));
+      break;
+    }
+  }
+  foreach ($updates['prescripts'] ?? [] as $scripts) {
+    if ( isset($installedUpdates[basename($scripts['url'])]) ) {
+      logger("Skipping {$scripts['url']} -- Already installed\n");
+      continue;
+    }
+    logger("Downloading {$scripts['url']}...");
+    if ( is_file("$newPath/".basename($scripts['url']))) {
+      if (md5_file("$newPath/".basename($scripts['url'])) == $scripts['md5']) {
+        logger("Script file already exists.  Skipping");
+        continue;
+      }
+    }
+
+    download_url($scripts['url'],"$newPath/".basename($scripts['url']));
+    if (md5_file("$newPath/".basename($scripts['url'])) !== $scripts['md5']) {
+      logger("MD5 verification failed!");
+      $downloadFailed = true;
+      @unlink("$newpath/".basename($scripts['file']));
       break;
     }
   }

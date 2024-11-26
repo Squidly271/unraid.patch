@@ -37,7 +37,7 @@ switch ($_POST['action']) {
 
 function accepted() {
   global $paths;
-  
+
   touch($paths['accepted']);
   echo "ok";
 }
@@ -51,15 +51,32 @@ function check() {
 
   $updatesAvailable = false;
   foreach ($availableUpdates['patches'] as $update) {
-    if ( ! $installedUpdates[basename($update['url'])] ?? false ) {
+    if ( ! ($installedUpdates[basename($update['url'])] ?? false) ) {
       $updatesAvailable = true;
       break;
     }
   }
   if ( ! $updatesAvailable ) {
+    foreach ($availableUpdates['scripts'] as $update) {
+      if ( ! ($installedUpdates[basename($update['url'])] ?? false) ) {
+        $updatesAvailable = true;
+        break;
+      }
+    }
+  }
+  if ( ! $updatesAvailable ) {
+    foreach ($availableUpdates['prescripts'] as $update) {
+      if ( ! ($installedUpdates[basename($update['url'])] ?? false) ) {
+        $updatesAvailable = true;
+        break;
+      }
+    }
+  }
+  if ( ! $updatesAvailable ) {
     echo "none";
   } else {
-    echo markdown($availableUpdates['changelog']);
+    $msg = version_compare($unraidVersion['version'],$availableUpdates['unraidVersion'],"!=") ? "  * MISMATCH" : "";
+    echo markdown("#Unraid Version: {$availableUpdates['unraidVersion']}$msg\n\n{$availableUpdates['changelog']}");
   }
 }
 
@@ -72,7 +89,8 @@ function currentchangelog() {
   global $paths, $unraidVersion;
 
   $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
-  echo markdown($current['changelog']);
+  $msg = version_compare($unraidVersion['version'],$current['unraidVersion'],"!=") ? "  * MISMATCH" : "";
+  echo markdown("#Unraid Version: {$current['unraidVersion']}$msg\n\n{$current['changelog']}");
 }
 
 function readJsonFile($filename) {
