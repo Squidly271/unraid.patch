@@ -90,7 +90,7 @@ function currentchangelog() {
 
   $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
   if ( ! $current['unraidVersion'] ?? false ) {
-    $current['unRaidVersion'] = $unraidVersion['version'];
+    $current['unraidVersion'] = $unraidVersion['version'];
     $current['changelog'] = "# No patches currently available";
   }
   $msg = version_compare($unraidVersion['version'],$current['unraidVersion'],"!=") ? "  * MISMATCH" : "";
