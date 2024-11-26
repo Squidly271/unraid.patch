@@ -50,14 +50,14 @@ function check() {
   $availableUpdates = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
 
   $updatesAvailable = false;
-  foreach ($availableUpdates['patches'] as $update) {
+  foreach ($availableUpdates['patches'] ?? [] as $update) {
     if ( ! ($installedUpdates[basename($update['url'])] ?? false) ) {
       $updatesAvailable = true;
       break;
     }
   }
   if ( ! $updatesAvailable ) {
-    foreach ($availableUpdates['scripts'] as $update) {
+    foreach ($availableUpdates['scripts'] ?? [] as $update) {
       if ( ! ($installedUpdates[basename($update['url'])] ?? false) ) {
         $updatesAvailable = true;
         break;
@@ -65,7 +65,7 @@ function check() {
     }
   }
   if ( ! $updatesAvailable ) {
-    foreach ($availableUpdates['prescripts'] as $update) {
+    foreach ($availableUpdates['prescripts'] ?? [] as $update) {
       if ( ! ($installedUpdates[basename($update['url'])] ?? false) ) {
         $updatesAvailable = true;
         break;
@@ -89,6 +89,10 @@ function currentchangelog() {
   global $paths, $unraidVersion;
 
   $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
+  if ( ! $current['unraidVersion'] ?? false ) {
+    $current['unRaidVersion'] = $unraidVersion['version'];
+    $current['changelog'] = "# No patches currently available";
+  }
   $msg = version_compare($unraidVersion['version'],$current['unraidVersion'],"!=") ? "  * MISMATCH" : "";
   echo markdown("#Unraid Version: {$current['unraidVersion']}$msg\n\n{$current['changelog']}");
 }
