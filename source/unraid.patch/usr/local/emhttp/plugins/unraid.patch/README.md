@@ -1,3 +1,3 @@
 ###Unraid Patch
-Keeps your server up to date with priority security updates
+Keeps your server current with the latest patches
 

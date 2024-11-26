@@ -106,7 +106,7 @@ function install() {
   }
   // install each update in order
   foreach($updates['patches'] as $script) {
-    $filename = "{$paths['flash']}/{$unraidVersion['version']}/".basename($script['url']);
+    $filename = "{$paths['flash']}{$unraidVersion['version']}/".basename($script['url']);
     if ( $installedUpdates[basename($script['url'])] ?? false ) {
       logger("Skipping $filename... Already Installed\n");
       continue;
@@ -133,7 +133,13 @@ function check() {
   global $option, $paths, $unraidVersion;
 
   $option = $option ?: $unraidVersion['version'];
-  $patchesAvailable = $paths['github']."/$option/patch/patches.json";
+  
+  if ( !is_file($paths['override']) ) {
+    $patchesAvailable = $paths['github']."/$option/patch/patches.json";
+  } else {
+    $patchesAvailable = trim(file_get_contents($paths['override']));
+  }
+
   logger("Checking for updates $patchesAvailable\n");
   $updates = download_json($patchesAvailable);
   if (! $updates || empty($updates) )
@@ -150,10 +156,15 @@ function check() {
       continue;
     }
     logger("Downloading {$patches['url']}...");
+    if ( is_file("$newPath/".basename($patches['url']))) {
+      if (md5_file("$newPath/".basename($patches['url'])) == $patches['md5']) {
+        logger("Patch file already exists.  Skipping");
+        continue;
+      }
+    }
 
     download_url($patches['url'],"$newPath/".basename($patches['url']));
     if (md5_file("$newPath/".basename($patches['url'])) !== $patches['md5']) {
-
       logger("MD5 verification failed!");
       $downloadFailed = true;
       @unlink("$newpath/".basename($patches['file']));
