@@ -107,7 +107,7 @@ function install() {
     exit(1);
   }
   // install each update in order
-  foreach($updates['prescript'] ?? [] as $script) {
+  foreach($updates['prescripts'] ?? [] as $script) {
     $filename = "{$paths['flash']}{$unraidVersion['version']}/".basename($script['url']);
     if ( $installedUpdates[basename($script['url'])] ?? false ) {
       logger("Skipping $filename... Already Installed\n");
