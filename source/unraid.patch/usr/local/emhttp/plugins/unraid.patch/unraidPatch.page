@@ -101,7 +101,7 @@ $(function() {
 <span style='display:none;' id='displayNew'>
 <span style='font-size:2rem;'>_(These patches will be automatically installed at the next boot of your server.  You can also click the Install Now button to install it immediately)_</span>
 <span id='changelognew'></span>
-<input type='button' value='_(Install Now)_' onclick='install();'></input>
+<input id='installButton' type='button' value='_(Install Now)_' onclick='install();'></input><input type='button' value='_(done)_' onclick='done();'></input>
 </span>
 <span style='display:none' id='displayInstalled'>
 <span style='font-size:2rem;'>_(No new patches found!  The following patches are already installed and will be reinstalled automatically when your server boots)_</span>

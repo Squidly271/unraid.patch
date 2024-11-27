@@ -79,6 +79,8 @@ function check() {
   } else {
     $msg = version_compare($unraidVersion['version'],$availableUpdates['unraidVersion'],"!=") ? "  * MISMATCH" : "";
     echo markdown("#Unraid Version: {$availableUpdates['unraidVersion']}$msg\n\n{$availableUpdates['changelog']}");
+    if ( $msg )
+      echo "<script>$('#installButton').prop('disabled',true);</script>";
   }
 }
 
@@ -97,6 +99,8 @@ function currentchangelog() {
   }
   $msg = version_compare($unraidVersion['version'],$current['unraidVersion'],"!=") ? "  * MISMATCH" : "";
   echo markdown("#Unraid Version: {$current['unraidVersion']}$msg\n\n{$current['changelog']}");
+  if ( $msg )
+    echo "<script>$('#installButton').prop('disabled',true);</script>";
 }
 
 function readJsonFile($filename) {
