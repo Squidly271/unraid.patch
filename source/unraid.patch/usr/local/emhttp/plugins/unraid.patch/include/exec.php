@@ -91,7 +91,7 @@ function currentchangelog() {
   global $paths, $unraidVersion;
 
   $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
-  if ( ! $current['unraidVersion'] ?? false ) {
+  if ( ! ($current['unraidVersion'] ?? false) ) {
     echo "none";
     return;
   }
