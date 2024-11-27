@@ -13,7 +13,9 @@ $docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: "/usr/local/emhttp";
 
 require_once "$docroot/plugins/unraid.patch/include/paths.php";
 require_once "$docroot/plugins/dynamix/include/Wrappers.php";
-require_once "$docroot/webGui/include/MarkdownExtra.inc.php";
+if (is_file("$docroot/webGui/include/MarkdownExtra.inc.php") ) {
+  require_once "$docroot/webGui/include/MarkdownExtra.inc.php";
+}
 require_once "$docroot/webGui/include/Markdown.php";
 
 $unraidVersion = parse_ini_file($paths['version']);
@@ -90,8 +92,8 @@ function currentchangelog() {
 
   $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
   if ( ! $current['unraidVersion'] ?? false ) {
-    $current['unraidVersion'] = $unraidVersion['version'];
-    $current['changelog'] = "# No patches currently available";
+    echo "none";
+    return;
   }
   $msg = version_compare($unraidVersion['version'],$current['unraidVersion'],"!=") ? "  * MISMATCH" : "";
   echo markdown("#Unraid Version: {$current['unraidVersion']}$msg\n\n{$current['changelog']}");

@@ -13,6 +13,7 @@ Title="Unraid Patch"
  */
 
 require_once "/usr/local/emhttp/plugins/unraid.patch/include/paths.php";
+$unraidVersion = parse_ini_file($paths['version']);
 ?>
 
 <script>
@@ -74,9 +75,11 @@ $(function() {
         setTimeout(function() {
           myAlert("_(No new patches found)_");
           $.post("<?=$paths['exec']?>",{action:"currentchangelog"},function(data) {
-            if (data) {
+            if (data.trim() !== "none" ) {
               $("#changelogold").html(data);
               $("#displayInstalled").show();
+            } else {
+              $("#displayNone").show();
             }
           });
           setTimeout(function(){
@@ -103,5 +106,9 @@ $(function() {
 <span style='display:none' id='displayInstalled'>
 <span style='font-size:2rem;'>_(No new patches found!  The following patches are already installed and will be reinstalled automatically when your server boots)_</span>
 <span id='changelogold'></span>
-<input type='button' value='done' onclick='done();'></input>
+<input type='button' value='_(done)_' onclick='done();'></input>
+</span>
+<span style='display:none' id='displayNone'>
+<span style='font-size:2rem;'>_(No patches found for Unraid OS version)_ <?=$unraidVersion['version']?><br><br></span>
+<input type='button' value='_(done)_' onclick='done();'></input>
 </span>
