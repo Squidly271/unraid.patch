@@ -179,7 +179,6 @@ function install() {
 function check() {
   global $option, $paths, $unraidVersion;
 
-  $option = $option ?: $unraidVersion['version'];
   
   if ( !is_file($paths['override']) ) {
     $patchesAvailable = $paths['github']."/$option/patch/patches.json";
@@ -194,6 +193,12 @@ function check() {
 
   $downloadFailed = false;
   $updatesAvailable = false;
+
+  if ( ! $option && is_file($paths['override']) ) {
+    $option = $updates['unraidVersion'];
+  } else {
+    $option = $option ?: $unraidVersion['version'];
+  }
   $installedUpdates = readJsonFile($paths['installedUpdates']);
   $newPath = "{$paths['flash']}/$option/";
   exec("mkdir -p ".escapeshellarg($newPath));
