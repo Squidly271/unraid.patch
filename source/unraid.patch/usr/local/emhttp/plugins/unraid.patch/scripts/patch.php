@@ -142,7 +142,9 @@ function install() {
       logger("MD5 verification failed.  Aborting\n");
       exit(1);
     }
-    passthru("/usr/bin/patch -d /usr/local/ -p1 -i ".escapeshellarg($filename),$exitCode);
+    $baseDir = version_compare($unraidVersion['version'],"6.12.0","<") ? "/usr/local/emhttp/" : "/usr/local/";
+
+    passthru("/usr/bin/patch -d $baseDir -p1 -i ".escapeshellarg($filename),$exitCode);
     if ( ! $exitCode ) {
       $installedUpdates[basename($script['url'])] = true;
     } else {
