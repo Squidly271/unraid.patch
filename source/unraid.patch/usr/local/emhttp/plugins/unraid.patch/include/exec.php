@@ -32,9 +32,6 @@ switch ($_POST['action']) {
   case "install":
     install();
     break;
-  case "currentchangelog":
-    currentchangelog();
-    break;
 }
 
 function accepted() {
@@ -90,7 +87,7 @@ function check() {
       echo "<script>$('#displayInstalled').show();</script>".markdown($availableUpdates['changelog']);
     } else {
       if ( $msg1 ) {
-        echo "<script>alert();$('#displayNone,#disp4').show();$('#disp3,#displayNew,#displayInstalled').hide();</script>";
+        echo "<script>$('#displayNone,#disp4').show();$('#disp3,#displayNew,#displayInstalled').hide();</script>";
       } else {
         echo "<script>$('#displayNone').show();</script>";
       }
