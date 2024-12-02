@@ -14,6 +14,18 @@ Title="Unraid Patch"
 
 require_once "/usr/local/emhttp/plugins/unraid.patch/include/paths.php";
 $unraidVersion = parse_ini_file($paths['version']);
+
+$changes = '/boot/changes.txt';
+if (file_exists($changes)) {
+  exec("head -n4 $changes",$rows);
+  foreach ($rows as $row) {
+    $i = stripos($row,'version');
+    if ($i !== false) {
+      [$downgradeversion,$date] = explode(' ',trim(substr($row,$i+7)));
+      break;
+    }
+  }
+}
 ?>
 
 <script>
@@ -69,30 +81,10 @@ $(function() {
   <? else: ?>
   myAlert("_(Checking For Patches)_");
   $.post("<?=$paths['exec']?>",{action:"check"},function(data) {
-    if (data) {
-      swal.close();
-      if (data.trim() == "none") {
-        setTimeout(function() {
-          myAlert("_(No new patches found)_");
-          $.post("<?=$paths['exec']?>",{action:"currentchangelog"},function(data) {
-            if (data.trim() !== "none" ) {
-              $("#changelogold").html(data);
-              $("#displayInstalled").show();
-            } else {
-              $("#displayNone").show();
-            }
-          });
-          setTimeout(function(){
-            swal.close();
-          },1000);
-        },1000);
-      } else {
-        $("#displayNew").show(); 
-        $("#changelognew").html(data);
-        swal.close();
-      }
-    }
-  })
+    swal.close();
+    $("#changelogold,#changelognew,#changelogdowngrade").html(data);
+    swal.close();
+  });
   <?endif;?>
   });
 
@@ -104,11 +96,15 @@ $(function() {
 <input id='installButton' type='button' value='_(Install Now)_' onclick='install();'></input><input type='button' value='_(done)_' onclick='done();'></input>
 </span>
 <span style='display:none' id='displayInstalled'>
-<span style='font-size:2rem;'>_(No new patches found!  The following patches are already installed and will be reinstalled automatically when your server boots)_</span>
+<span id='disp1' style='font-size:2rem;'>_(No new patches found!  The following patches are already installed and will be reinstalled automatically when your server boots)_</span>
+<span id='disp2' style='display:none; font-size:2rem;'>_(No new patches found!)_</span>
 <span id='changelogold'></span>
 <input type='button' value='_(done)_' onclick='done();'></input>
 </span>
 <span style='display:none' id='displayNone'>
-<span style='font-size:2rem;'>_(No patches found for Unraid OS version)_ <?=$unraidVersion['version']?><br><br></span>
+<span id='disp3' style='font-size:2rem;'>_(No patches found for Unraid OS version)_ <?=$unraidVersion['version']?><br><br></span>
+<span id='disp4' style='display:none; font-size:2rem;'>_(No patches found.  Note that the Unraid OS version will change at boot time to)_ <?=$downgradeversion?><br><br></span>
+<span id='disp5' style='display:none; font-size:2rem;'>_(Note that the Unraid OS version will change at boot time to)_ <?=$downgradeversion?><br><br>_(The following updates will be automatically installed)_<br><br></span>
+<span id='changelogdowngrade'></span>
 <input type='button' value='_(done)_' onclick='done();'></input>
 </span>

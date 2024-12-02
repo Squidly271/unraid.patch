@@ -48,6 +48,12 @@ function check() {
   global $paths,$unraidVersion;
 
   exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php check");
+  $downgradeVersion = downgradeVersion();
+  if ( $downgradeVersion !== $unraidVersion['version'] ) {
+    $msg1 = " - Note: This OS version and patches will be installed boot time";
+    $unraidVersion['version'] = $downgradeVersion;
+  }
+  
   $installedUpdates = readJsonFile($paths['installedUpdates']);
   $availableUpdates = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
   if ( is_file($paths['override']) ) {
@@ -55,6 +61,7 @@ function check() {
     $availableUpdates = readJsonFile($paths['overridePatch']);
   }
 
+  $unraidVersion['version'] = $downgradeVersion;
   $updatesAvailable = false;
   foreach ($availableUpdates['patches'] ?? [] as $update) {
     if ( ! ($installedUpdates[basename($update['url'])] ?? false) ) {
@@ -78,16 +85,35 @@ function check() {
       }
     }
   }
-
-  if ( ! $updatesAvailable ) {
-    echo "none";
+  if ( ! $updatesAvailable && ! is_file($paths['override']) ) {
+    if ( ! empty($availableUpdates) ) {
+      echo "<script>$('#displayInstalled').show();</script>".markdown($availableUpdates['changelog']);
+    } else {
+      if ( $msg1 ) {
+        echo "<script>alert();$('#displayNone,#disp4').show();$('#disp3,#displayNew,#displayInstalled').hide();</script>";
+      } else {
+        echo "<script>$('#displayNone').show();</script>";
+      }
+    }
+    return;
   } else {
     if ( is_file($paths['override'] ) )
       echo markdown("#Override File Present\n");
+    }
     $msg = version_compare($unraidVersion['version'],$availableUpdates['unraidVersion'],"!=") ? "  * MISMATCH" : "";
-    echo markdown("#Unraid Version: {$availableUpdates['unraidVersion']}$msg\n\n{$availableUpdates['changelog']}");
+    echo markdown("#Unraid Version: {$availableUpdates['unraidVersion']}$msg$msg1\n\n{$availableUpdates['changelog']}");
     if ( $msg )
-      echo "<script>$('#installButton').prop('disabled',true);</script>";
+      echo "<script>$('#displayNew').show();$('#installButton').prop('disabled',true);</script>";
+    else {
+      if ( ! $msg1 ) {
+        echo "<script>$('#displayNew').show();</script>";
+      } else {
+        if ( empty($availableUpdates) )
+          echo "<script>$('#displayNone,#disp4').show();$('#disp3').hide();</script>";
+        else {
+          echo "<script>$('#displayNone,#disp5').show();$('#disp3').hide();</script>";
+        }
+      }
   }
 }
 
@@ -96,29 +122,26 @@ function install() {
   echo "installed";
 }
 
-function currentchangelog() {
-  global $paths, $unraidVersion;
-
-  if ( is_file($paths['override']) ) {
-    $current = readJsonFile($paths['overridePatch']);
-  } else {
-    $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
-  }
-
-  if ( ! ($current['unraidVersion'] ?? false) ) {
-    echo "none";
-    return;
-  }
-  $msg = version_compare($unraidVersion['version'],$current['unraidVersion'],"!=") ? "  * MISMATCH" : "";
-  echo markdown("#Unraid Version: {$current['unraidVersion']}$msg\n\n{$current['changelog']}");
-  if ( $msg )
-    echo "<script>$('#installButton').prop('disabled',true);</script>";
-}
 
 function readJsonFile($filename) {
   $json = json_decode(@file_get_contents($filename),true);
 
   return is_array($json) ? $json : array();
+}
+
+function downgradeVersion() {
+  $changes = '/boot/changes.txt';
+  if (file_exists($changes)) {
+    exec("head -n4 $changes",$rows);
+    foreach ($rows as $row) {
+      $i = stripos($row,'version');
+      if ($i !== false) {
+        [$version,$date] = explode(' ',trim(substr($row,$i+7)));
+        break;
+      }
+    }
+  }
+  return $version;
 }
 ?>
 
