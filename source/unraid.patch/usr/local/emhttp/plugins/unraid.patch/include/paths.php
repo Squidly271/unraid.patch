@@ -16,5 +16,6 @@ $paths['flash'] = "/boot/config/plugins/unraid.patch/";
 $paths['version'] = "/etc/unraid-version";
 $paths['github'] = "https://releases.unraid.net/dl/stable";
 $paths['override'] = "{$paths['flash']}patch-url-override.txt";
+$paths['overridePatch'] = "{$paths['flash']}overridePatch.json";
 $paths['accepted'] = "/boot/config/plugins/unraid.patch/accepted";
 ?>

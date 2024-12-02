@@ -50,6 +50,10 @@ function check() {
   exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php check");
   $installedUpdates = readJsonFile($paths['installedUpdates']);
   $availableUpdates = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
+  if ( is_file($paths['override']) ) {
+    $installedUpdates = [];
+    $availableUpdates = readJsonFile($paths['overridePatch']);
+  }
 
   $updatesAvailable = false;
   foreach ($availableUpdates['patches'] ?? [] as $update) {
@@ -74,9 +78,12 @@ function check() {
       }
     }
   }
+
   if ( ! $updatesAvailable ) {
     echo "none";
   } else {
+    if ( is_file($paths['override'] ) )
+      echo markdown("#Override File Present\n");
     $msg = version_compare($unraidVersion['version'],$availableUpdates['unraidVersion'],"!=") ? "  * MISMATCH" : "";
     echo markdown("#Unraid Version: {$availableUpdates['unraidVersion']}$msg\n\n{$availableUpdates['changelog']}");
     if ( $msg )
@@ -92,7 +99,12 @@ function install() {
 function currentchangelog() {
   global $paths, $unraidVersion;
 
-  $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
+  if ( is_file($paths['override']) ) {
+    $current = readJsonFile($paths['overridePatch']);
+  } else {
+    $current = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
+  }
+
   if ( ! ($current['unraidVersion'] ?? false) ) {
     echo "none";
     return;

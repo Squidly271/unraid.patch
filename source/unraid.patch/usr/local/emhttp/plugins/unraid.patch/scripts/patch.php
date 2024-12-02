@@ -142,7 +142,7 @@ function install() {
       logger("MD5 verification failed.  Aborting\n");
       exit(1);
     }
-    $baseDir = version_compare($unraidVersion['version'],"6.12.0","<") ? "/usr/local/emhttp/" : "/usr/local/";
+    $baseDir = version_compare($unraidVersion['version'],"6.12.0","<") ? "/usr/local/emhttp/" : "/usr/local";
 
     passthru("/usr/bin/patch -d $baseDir -p1 -i ".escapeshellarg($filename),$exitCode);
     if ( ! $exitCode ) {
@@ -193,6 +193,9 @@ function check() {
   if (! $updates || empty($updates) )
     return;
 
+  if ( is_file($paths['override']) ) 
+    writeJsonFile($paths['overridePatch'],$updates);
+  
   $downloadFailed = false;
   $updatesAvailable = false;
 
