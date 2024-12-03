@@ -44,13 +44,13 @@ function accepted() {
 function check() {
   global $paths,$unraidVersion;
 
-  exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php check");
   $downgradeVersion = downgradeVersion();
   if ( $downgradeVersion !== $unraidVersion['version'] ) {
     $msg1 = " - Note: This OS version and patches will be installed boot time";
     $unraidVersion['version'] = $downgradeVersion;
   }
-  
+  exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php check {$unraidVersion['version']}");
+
   $installedUpdates = readJsonFile($paths['installedUpdates']);
   $availableUpdates = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");
   if ( is_file($paths['override']) ) {
