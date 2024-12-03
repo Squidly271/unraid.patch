@@ -181,7 +181,6 @@ function install() {
 function check() {
   global $option, $paths, $unraidVersion;
 
-  
   if ( !is_file($paths['override']) ) {
     $patchesAvailable = $paths['github']."/$option/patch/patches.json";
   } else {
@@ -193,17 +192,19 @@ function check() {
   if (! $updates || empty($updates) )
     return;
 
-  if ( is_file($paths['override']) ) 
+  if ( is_file($paths['override']) ) {
     writeJsonFile($paths['overridePatch'],$updates);
-  
+    $option = $updates['unraidVersion'];
+  }
+
   $downloadFailed = false;
   $updatesAvailable = false;
 
-  if ( ! $option && is_file($paths['override']) ) {
-    $option = $updates['unraidVersion'];
-  } else {
-    $option = $option ?: $unraidVersion['version'];
-  }
+  //if ( ! $option && is_file($paths['override']) ) {
+  //  $option = $updates['unraidVersion'];
+  //} else {
+  //  $option = $option ?: $unraidVersion['version'];
+  //}
   $installedUpdates = readJsonFile($paths['installedUpdates']);
   $newPath = "{$paths['flash']}/$option/";
   exec("mkdir -p ".escapeshellarg($newPath));
@@ -215,7 +216,7 @@ function check() {
     logger("Downloading {$patches['url']}...");
     if ( is_file("$newPath/".basename($patches['url']))) {
       if (md5_file("$newPath/".basename($patches['url'])) == $patches['md5']) {
-        logger("Patch file already exists.  Skipping");
+        logger("Patch file already exists $newPath.  Skipping");
         continue;
       }
     }
