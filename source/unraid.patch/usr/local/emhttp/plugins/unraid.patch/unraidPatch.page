@@ -26,6 +26,12 @@ if (file_exists($changes)) {
     }
   }
 }
+
+if ( ($_COOKIE['patchOverrideNew'] ?? false) && is_file($paths['override']) ) {
+  file_put_contents($paths['override'],"https://releases.unraid.net/dl/preview/{$_COOKIE['patchOverrideNew']}/patch/patches.json");
+  @unlink($paths['overridePatch']);
+  setcookie("patchOverrideNew","");
+}
 ?>
 
 <script>
@@ -92,8 +98,14 @@ $(function() {
   <?endif;?>
 });
 
-
+function overrideOS() {
+  $.cookie("patchOverrideNew",$("#OS").val());
+  window.location.reload();
+}
 </script>
+<? if (is_file($paths['override']) ): ?>
+  <input type='text' id='OS' placeholder='Override OS version' onchange='overrideOS();'></input><br><br>
+<? endif;?>
 <span style='display:none;' id='displayNew'>
 <span style='font-size:2rem;'>_(These patches will be automatically installed at the next boot of your server.  You can also click the Install Now button to install it immediately)_</span>
 <span id='changelognew'></span>
