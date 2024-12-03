@@ -227,7 +227,7 @@ function check() {
     if (md5_file("$newPath/".basename($patches['url'])) !== $patches['md5']) {
       logger("MD5 verification failed!");
       $downloadFailed = true;
-      @unlink("$newpath/".basename($patches['file']));
+      @unlink("$newPath/".basename($patches['file']));
       break;
     }
   }
@@ -248,7 +248,7 @@ function check() {
     if (md5_file("$newPath/".basename($scripts['url'])) !== $scripts['md5']) {
       logger("MD5 verification failed!");
       $downloadFailed = true;
-      @unlink("$newpath/".basename($scripts['file']));
+      @unlink("$newPath/".basename($scripts['file']));
       break;
     }
   }
@@ -269,7 +269,7 @@ function check() {
     if (md5_file("$newPath/".basename($scripts['url'])) !== $scripts['md5']) {
       logger("MD5 verification failed!");
       $downloadFailed = true;
-      @unlink("$newpath/".basename($scripts['file']));
+      @unlink("$newPath/".basename($scripts['file']));
       break;
     }
   }
