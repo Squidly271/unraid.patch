@@ -49,7 +49,11 @@ function check() {
     $msg1 = " - Note: This OS version and patches will be installed boot time";
     $unraidVersion['version'] = $downgradeVersion;
   }
-  exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php check $downgradeVersion");
+  exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php check $downgradeVersion",$output,$error);
+  if ( $error ) {
+    echo "<script>$('#displayError').show();</script>".implode("<br>",$output);
+    return;
+  }
 
   $installedUpdates = readJsonFile($paths['installedUpdates']);
   $availableUpdates = readJsonFile($paths['flash'].$unraidVersion['version']."/patches.json");

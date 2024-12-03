@@ -69,7 +69,7 @@ function logger($msg) {
 $unraidVersion = parse_ini_file($paths['version']);
 
 $action = $argv[1] ?? "";
-$option = $argv[2] ?? "";
+$option = $argv[2] ?? $unraidVersion['version'];
 
 switch($action) {
   case "install":
@@ -142,7 +142,7 @@ function install() {
       logger("MD5 verification failed.  Aborting\n");
       exit(1);
     }
-    $baseDir = version_compare($unraidVersion['version'],"6.12.0","<") ? "/usr/local/emhttp/" : "/usr/local";
+    $baseDir = $script['dir'] ?? "/usr/local/";
 
     passthru("/usr/bin/patch -d $baseDir -p1 -i ".escapeshellarg($filename),$exitCode);
     if ( ! $exitCode ) {
@@ -189,8 +189,10 @@ function check() {
 
   logger("Checking for patches $patchesAvailable\n");
   $updates = download_json($patchesAvailable);
-  if (! $updates || empty($updates) )
+  if (! $updates || empty($updates) ) {
+    logger("No patches found");
     return;
+  }
 
   if ( is_file($paths['override']) ) {
     writeJsonFile($paths['overridePatch'],$updates);
@@ -206,7 +208,7 @@ function check() {
   //  $option = $option ?: $unraidVersion['version'];
   //}
   $installedUpdates = readJsonFile($paths['installedUpdates']);
-  $newPath = "{$paths['flash']}/$option/";
+  $newPath = "{$paths['flash']}$option/";
   exec("mkdir -p ".escapeshellarg($newPath));
   foreach ($updates['patches'] ?? [] as $patches) {
     if ( isset($installedUpdates[basename($patches['url'])]) ) {
@@ -216,7 +218,7 @@ function check() {
     logger("Downloading {$patches['url']}...");
     if ( is_file("$newPath/".basename($patches['url']))) {
       if (md5_file("$newPath/".basename($patches['url'])) == $patches['md5']) {
-        logger("Patch file already exists $newPath.  Skipping");
+        logger("\nPatch file already exists $newPath".basename($patches['url'])."   Skipping");
         continue;
       }
     }
@@ -272,7 +274,8 @@ function check() {
     }
   }
   if ( $downloadFailed ) {
-    logger("\n\Downloads aborted.");
+    logger("\n");
+    logger("Downloads aborted.");
     // only delete files that haven't already been installed
     $alreadyInstalled = glob("{$paths['flash']}/$option/");
     foreach ( $alreadyInstalled as $file) {
@@ -280,6 +283,7 @@ function check() {
         @unlink($file);
       }
     }
+    exit(1);
   } else {
     writeJsonFile("{$paths['flash']}/$option/patches.json",$updates);
   }

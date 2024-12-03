@@ -93,7 +93,7 @@ $(function() {
   myAlert("_(Checking For Patches)_");
   $.post("<?=$paths['exec']?>",{action:"check"},function(data) {
     swal.close();
-    $("#changelogold,#changelognew,#changelogdowngrade").html(data);
+    $("#changelogold,#changelognew,#changelogdowngrade,#errorText").html(data);
   });
   <?endif;?>
 });
@@ -123,4 +123,9 @@ function overrideOS() {
 <span id='disp5' style='display:none; font-size:2rem;'>_(Note that the Unraid OS version will change at boot time to)_ <?=$downgradeversion?><br><br>_(The following updates will be automatically installed)_<br><br></span>
 <span id='changelogdowngrade'></span>
 <input type='button' value='_(done)_' onclick='done();'></input>
+</span>
+<span style='display:none;' id='displayError'>
+  <span style='font-size:2rem;'>_(An error occurred downloading updated patch files)_</span><br><br>
+  <code id='errorText'></code><br><br>
+  <input type='button' value='_(Try Again)_' onclick='window.location.reload();'></input><input type='button' value='_(Done)_' onclick='done();'></input>
 </span>
