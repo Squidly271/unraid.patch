@@ -57,7 +57,12 @@ function install() {
 }
 
 $(function() {
-  caPluginUpdateCheck("unraid.patch.plg");
+  caPluginUpdateCheck("unraid.patch.plg",{
+      noDismiss:true,
+      name:"Unraid Patch",
+      debug:false,
+      priority:true
+  });
 
   <?if ( ! file_exists("/boot/config/plugins/unraid.patch/accepted") ) :?>
     swal({
@@ -83,10 +88,9 @@ $(function() {
   $.post("<?=$paths['exec']?>",{action:"check"},function(data) {
     swal.close();
     $("#changelogold,#changelognew,#changelogdowngrade").html(data);
-    swal.close();
   });
   <?endif;?>
-  });
+});
 
 
 </script>
