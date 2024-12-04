@@ -45,6 +45,7 @@ function check() {
   global $paths,$unraidVersion;
 
   $downgradeVersion = downgradeVersion();
+  $msg1 = "";
   if ( $downgradeVersion !== $unraidVersion['version'] ) {
     $msg1 = " - Note: This OS version and patches will be installed boot time";
     $unraidVersion['version'] = $downgradeVersion;
