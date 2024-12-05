@@ -21,6 +21,7 @@ require_once "$docroot/webGui/include/Markdown.php";
 $unraidVersion = parse_ini_file($paths['version']);
 
 $_POST['action'] = $_POST['action'] ?? $argv[1];
+$background = ($argv[2]??"") == "background";
 
 switch ($_POST['action']) {
   case "accepted": 
@@ -34,6 +35,16 @@ switch ($_POST['action']) {
     break;
 }
 
+function my_echo($message) {
+  global $background;
+
+  if ( $background ){
+    return;
+  } else {
+    echo $message;
+  }
+}
+
 function accepted() {
   global $paths;
 
@@ -42,7 +53,7 @@ function accepted() {
 }
 
 function check() {
-  global $paths,$unraidVersion;
+  global $paths,$unraidVersion, $background;
 
   $downgradeVersion = downgradeVersion();
   $msg1 = "";
@@ -52,7 +63,7 @@ function check() {
   }
   exec("/usr/local/emhttp/plugins/unraid.patch/scripts/patch.php check $downgradeVersion",$output,$error);
   if ( $error ) {
-    echo "<script>$('#displayError').show();</script>".implode("<br>",$output);
+    my_echo("<script>$('#displayError').show();</script>".implode("<br>",$output));
     return;
   }
 
@@ -87,33 +98,41 @@ function check() {
       }
     }
   }
+  if ($background && ! $updatesAvailable) {
+    echo "none";
+    return;
+  }
+  if ($background && $updatesAvailable) {
+    echo "Patches Available!";
+    return;
+  }
   if ( ! $updatesAvailable && ! is_file($paths['override']) ) {
     if ( ! empty($availableUpdates) ) {
-      echo "<script>$('#displayInstalled').show();</script>".markdown($availableUpdates['changelog']);
+      my_echo("<script>$('#displayInstalled').show();</script>".markdown($availableUpdates['changelog']));
     } else {
       if ( $msg1 ) {
-        echo "<script>$('#displayNone,#disp4').show();$('#disp3,#displayNew,#displayInstalled').hide();</script>";
+        my_echo("<script>$('#displayNone,#disp4').show();$('#disp3,#displayNew,#displayInstalled').hide();</script>");
       } else {
-        echo "<script>$('#displayNone').show();</script>";
+        my_echo("<script>$('#displayNone').show();</script>");
       }
     }
     return;
   } else {
     if ( is_file($paths['override'] ) )
-      echo markdown("#Override File Present\n");
+      my_echo(markdown("#Override File Present\n"));
     }
     $msg = version_compare($unraidVersion['version'],$availableUpdates['unraidVersion'],"!=") ? "  * MISMATCH" : "";
-    echo markdown("#Unraid Version: {$availableUpdates['unraidVersion']}$msg$msg1\n\n{$availableUpdates['changelog']}");
+    my_echo(markdown("#Unraid Version: {$availableUpdates['unraidVersion']}$msg$msg1\n\n{$availableUpdates['changelog']}"));
     if ( $msg )
-      echo "<script>$('#displayNew').show();$('#installButton').prop('disabled',true);</script>";
+      my_echo( "<script>$('#displayNew').show();$('#installButton').prop('disabled',true);</script>");
     else {
       if ( ! $msg1 ) {
-        echo "<script>$('#displayNew').show();</script>";
+        my_echo( "<script>$('#displayNew').show();</script>");
       } else {
         if ( empty($availableUpdates) )
-          echo "<script>$('#displayNone,#disp4').show();$('#disp3').hide();</script>";
+          my_echo("<script>$('#displayNone,#disp4').show();$('#disp3').hide();</script>");
         else {
-          echo "<script>$('#displayNone,#disp5').show();$('#disp3').hide();</script>";
+          my_echo("<script>$('#displayNone,#disp5').show();$('#disp3').hide();</script>");
         }
       }
   }

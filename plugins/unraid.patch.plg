@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "unraid.patch">
 <!ENTITY author    "Andrew Zawadzki">
-<!ENTITY version   "2024.12.03b">
-<!ENTITY md5       "172e4273177a417f8294e6a5c6fb8c24">
+<!ENTITY version   "2024.12.04">
+<!ENTITY md5       "dd83b354714b771082a6e4066c7c1a4e">
 <!ENTITY plugdir   "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github    "Squidly271/unraid.patch">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/plugins/&name;.plg">
